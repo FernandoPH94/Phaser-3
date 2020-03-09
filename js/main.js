@@ -30,7 +30,6 @@ function preload ()
     this.load.image('suelo','../img/ground.png')
     this.load.image('personaje','../img/personaje.png')
     this.load.image('huevo','../img/huevo.png')
-    this.load.image('huevo-icon','../img/huevo-icon.png')
     this.load.image('misil','../img/uwu.png')
 }
 
@@ -62,6 +61,11 @@ function create ()
         setScale: { x: 0.04, y: 0.04 }
     });
 
+
+    /*
+    *
+    *
+    */
     this.physics.add.collider(stars, platforms);
     this.physics.add.collider(player, platforms);
 
@@ -69,16 +73,13 @@ function create ()
 
     stars.children.iterate(function (child) {
         child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    
     });
 
     scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
-
-    bullets = this.physics.add.group();
-    bullets.enableBody = true;
-    bullets.physicsBodyType = Phaser.Physics.ARCADE;
-
-    bullets.createMultiple(50, 'misil');
+    
+    bullets = this.physics.add.group();   
+    bullets.allowGravity = false; 
+    this.physics.add.collider(bullets, platforms,choca)
 }
 
 function update(){
@@ -104,11 +105,18 @@ function update(){
     {
         fire();
     }
+    bullets.getChildren().forEach(Element => {
+        if(Element.y<0){
+            Element.disableBody(true, true);
+            bullets.remove(Element)
+        }
+    });
 }
 
-function collectStar (player, star)
-{
-    star.disableBody(true, true);
+function choca(bullets){
+    // bullets.disableBody(true, true);
+    // bullets.remove()
+    console.log(bullets);
 }
 
 function collectStar (player, star)
@@ -120,16 +128,11 @@ function collectStar (player, star)
 }
 
 function fire() {
-
-    if (game.time.now > nextFire && bullets.countDead() > 0)
-    {
-        nextFire = game.time.now + fireRate;
-
-        var bullet = bullets.getFirstDead();
-
-        bullet.reset(sprite.x - 8, sprite.y - 8);
-
-        game.physics.arcade.moveToPointer(bullet, 300);
+    if(bullets.getLength ()==0){
+    bullets.create(player.x, player.y, 'misil').setScale(0.1);
+    bullets.setVelocityY(-500);
+    console.log(player.x)
     }
-
+    console.log(bullets.getLength ());
 }
+
